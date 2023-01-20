@@ -32,26 +32,26 @@ public class Order implements Serializable {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
 	private Instant moment;
 
-	//Internamente é um Integer, mas fora da classe deve se manter um OrderStatus
+	// Internamente é um Integer, mas fora da classe deve se manter um OrderStatus
 	private Integer orderStatus;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "client_id")
 	private User client;
-	
-	@OneToMany(mappedBy="id.order")
-	private Set<OrderItem> items  = new HashSet<>();
 
-	@OneToOne(mappedBy= "order", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "id.order")
+	private Set<OrderItem> items = new HashSet<>();
+
+	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
 	private Payment payment;
-	
+
 	public Order() {
 	}
 
-	public Order(Long id, Instant moment, OrderStatus orderStatus, User client ) {
+	public Order(Long id, Instant moment, OrderStatus orderStatus, User client) {
 		this.id = id;
 		this.moment = moment;
-		setOrderStatus(orderStatus); //Vai converter o OrderStatus de enumerado para Integer.
+		setOrderStatus(orderStatus); // Vai converter o OrderStatus de enumerado para Integer.
 		this.client = client;
 
 	}
@@ -72,19 +72,19 @@ public class Order implements Serializable {
 		this.moment = moment;
 	}
 
-	public OrderStatus getOrderStatus(){
-		//Vai converter o OrderStatus de Integer para enumerado antes de retornar.
+	public OrderStatus getOrderStatus() {
+		// Vai converter o OrderStatus de Integer para enumerado antes de retornar.
 		return OrderStatus.valueOf(orderStatus);
 	}
-	
+
 	public void setOrderStatus(OrderStatus orderStatus) {
-		
-		//Caso o programar passe um valor nulo, essa operação não deve ser feita.
-		
-		if(orderStatus != null) {
-		//Vai pegar o valor da variável "code" do OrderStatus, que é um int. 
-		this.orderStatus = orderStatus.getCode();
-	}
+
+		// Caso o programar passe um valor nulo, essa operação não deve ser feita.
+
+		if (orderStatus != null) {
+			// Vai pegar o valor da variável "code" do OrderStatus, que é um int.
+			this.orderStatus = orderStatus.getCode();
+		}
 	}
 
 	public User getClient() {
@@ -94,17 +94,27 @@ public class Order implements Serializable {
 	public void setClient(User client) {
 		this.client = client;
 	}
-	
-	public Set<OrderItem> getItems(){
+
+	public Set<OrderItem> getItems() {
 		return items;
 	}
-	
+
 	public Payment getPayment() {
 		return payment;
 	}
-	
+
 	public void setPayment(Payment payment) {
 		this.payment = payment;
+	}
+
+	// Métodos
+	// No Java EE, precisa do get.
+	public Double getTotal() {
+		double sum = 0.0;
+		for (OrderItem x : items) {
+			sum += x.getSubTotal();
+		}
+		return sum;
 	}
 
 	@Override
